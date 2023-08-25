@@ -1,4 +1,4 @@
-import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
+import { App, Editor, MarkdownPostProcessorContext, MarkdownPreviewRenderer, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
 
 // Remember to rename these classes and interfaces!
 
@@ -10,11 +10,42 @@ const DEFAULT_SETTINGS: MyPluginSettings = {
 	mySetting: 'default'
 }
 
-export default class MyPlugin extends Plugin {
+export default class HexVision extends Plugin {
 	settings: MyPluginSettings;
+
+    // hexColourPostProcessor = MarkdownPreviewRenderer.createCodeBlockPostProcessor('myLanguage', (el, code, lang) => {
+    //     // Process the code block here
+    //     // For example, you can highlight specific keywords or add custom CSS classes
+    // });
 
 	async onload() {
 		await this.loadSettings();
+
+        this.registerMarkdownCodeBlockProcessor('hex', (source, el, ctx) => {
+            // Process the code block here
+            // For example, you can highlight specific keywords or add custom CSS classes
+            
+
+            const customHTML = `<pre class="language-hex"><code class="language-hex">${source}</code></pre>`;
+            el.innerHTML = customHTML;
+        });
+
+        // Color Pallet
+        this.registerMarkdownCodeBlockProcessor('palette-hex', (source, el, ctx) => {
+            let paletteHTML: string = "<table class='colour-table'>"
+            // el.innerHTML.concat("<table>");
+            
+            const lines: string[] = source.split("\n");
+
+            for (const line of lines) {
+                paletteHTML += `<tr><td style="background-color: ${line};"><code>${line}</code></td></tr>`;
+            }
+            paletteHTML += "</table>";
+
+            // const customHTML = `<pre class="language-hex"><code class="language-hex">${source}</code></pre>`;
+            // el.innerHTML.concat("</table>");
+            el.innerHTML = paletteHTML;
+        });
 
 		// This creates an icon in the left ribbon.
 		const ribbonIconEl = this.addRibbonIcon('dice', 'Sample Plugin', (evt: MouseEvent) => {
@@ -25,17 +56,17 @@ export default class MyPlugin extends Plugin {
 		ribbonIconEl.addClass('my-plugin-ribbon-class');
 
 		// This adds a status bar item to the bottom of the app. Does not work on mobile apps.
-		const statusBarItemEl = this.addStatusBarItem();
-		statusBarItemEl.setText('Status Bar Text');
+		// const statusBarItemEl = this.addStatusBarItem();
+		// statusBarItemEl.setText('Status Bar Text');
 
 		// This adds a simple command that can be triggered anywhere
-		this.addCommand({
-			id: 'open-sample-modal-simple',
-			name: 'Open sample modal (simple)',
-			callback: () => {
-				new SampleModal(this.app).open();
-			}
-		});
+		// this.addCommand({
+		// 	id: 'open-sample-modal-simple',
+		// 	name: 'Open sample modal (simple)',
+		// 	callback: () => {
+		// 		new SampleModal(this.app).open();
+		// 	}
+		// });
 		// This adds an editor command that can perform some operation on the current editor instance
 		this.addCommand({
 			id: 'sample-editor-command',
@@ -108,9 +139,9 @@ class SampleModal extends Modal {
 }
 
 class SampleSettingTab extends PluginSettingTab {
-	plugin: MyPlugin;
+	plugin: HexVision;
 
-	constructor(app: App, plugin: MyPlugin) {
+	constructor(app: App, plugin: HexVision) {
 		super(app, plugin);
 		this.plugin = plugin;
 	}
