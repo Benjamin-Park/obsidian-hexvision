@@ -10,6 +10,10 @@ const DEFAULT_SETTINGS: MyPluginSettings = {
 	mySetting: 'default'
 }
 
+function isValidColor(color: string) {
+    return CSS.supports('color', color);
+}
+
 export default class HexVision extends Plugin {
 	settings: MyPluginSettings;
 
@@ -38,6 +42,7 @@ export default class HexVision extends Plugin {
             const lines: string[] = source.split("\n");
 
             for (const line of lines) {
+                if (!isValidColor(line)) { continue; }
                 paletteHTML += `<tr><td style="background-color: ${line};"><code>${line}</code></td></tr>`;
             }
             paletteHTML += "</table>";
